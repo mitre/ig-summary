@@ -1,0 +1,15 @@
+leftName: Name for left-hand file to display in output
+rightName: Name for right-hand file to display in output
+
+# If there are any columns you do not want to consider in comparisons, list them here. The column name in this file
+# must be an exact match for the column header in Excel or it will be ignored.
+ignoreColumnsWhenComparing:
+  - column name here
+
+# This allows you to perform a "find and replace" to remove non-meaningful changes before the comparison. For example,
+# if you renamed a profile, you can replace the old `Profile URI` with the new one to avoid the elements appearing
+# as if they were removed and re-added.
+remapValues:
+  - column: Some column name
+    old: some value
+    new: some value

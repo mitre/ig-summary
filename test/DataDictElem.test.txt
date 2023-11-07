@@ -1,0 +1,94 @@
+/*
+
+    // Old tests
+    describe('#name()', () => {
+        it('should properly split and capitalize titles', () => {
+            const elemJson = findElementById([defs], 'CancerPatient', 'Patient.address.postalCode');
+            const elem = new ProfileElement(elemJson, metadata, defs, externalDependencyDefs);
+            expect(elem.row.name).toBe('Address > Postal Code');
+        });
+    });
+
+
+
+    describe('#toJSON()', () => {
+        it('should properly expand Patient.extension:race', () => {
+           const elemJson = findElementById([defs], 'CancerPatient', 'Patient.extension:race');
+           const elem = new ProfileElement(elemJson, metadata, defs, externalDependencyDefs);
+           const json = elem.toJSON();
+
+           expect(json.length).toBe(7);
+        });
+
+        it('should properly expand PrimaryCancerCondition.assertedDate', () => {
+            const elemJson = findElementById([defs], 'PrimaryCancerCondition', 'Condition.extension:assertedDate');
+            const elem = new ProfileElement(elemJson, metadata, defs, externalDependencyDefs);
+            const json = elem.toJSON();
+
+            expect(json.length).toBe(1);
+        });
+    });
+
+    it('should expand referenced profile names', () => {
+        const elemJson = findElementById([defs], 'CancerDiseaseStatus', 'Observation.subject');
+        const elem = new ProfileElement(elemJson, metadata, defs, externalDependencyDefs);
+
+        expect(elem.row.elemType).toBe('Reference(Patient)');
+    });
+
+    it('should set a value set on Condition.bodySite.extension:locationQualifier', () => {
+        const elemJson = findElementById([defs], 'PrimaryCancerCondition', 'Condition.bodySite.extension:locationQualifier');
+        const elem = new ProfileElement(elemJson, metadata, defs, externalDependencyDefs);
+
+        expect(elem.row.valueSet).toBe(
+            'http://hl7.org/fhir/us/mcode/ValueSet/mcode-location-qualifier-vs'
+        );
+        expect(elem.row.valueSetBinding).toBe('required');
+    });
+
+    it('should detect CodeableConcept for Observation.component:GeneStudied', () => {
+        metadata.profileURI = 'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-cancer-genetic-variant';
+        const elemJson = findElementById([defs], 'mcode-cancer-genetic-variant', 'Observation.component:GeneStudied');
+        const elem = new ProfileElement(elemJson, metadata, defs, externalDependencyDefs);
+        expect(elem.row.valueSet).toBe(
+            'http://hl7.org/fhir/us/mcode/ValueSet/mcode-hgnc-vs'
+        );
+    });
+
+    it('should detect type of any for Observation.component:CytogeneticLocation', () => {
+        metadata.profileURI = 'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-cancer-genetic-variant';
+        const elemJson = findElementById([defs], 'mcode-cancer-genetic-variant', 'Observation.component:CytogeneticLocation');
+        const elem = new ProfileElement(elemJson, metadata, defs, externalDependencyDefs);
+        expect(elem.row.elemType).toBe(
+            'Any'
+        );
+    });
+
+    it('should detect reference type for MedicationRequest.encounter', () => {
+        const elemJson = findElementById([defs], 'CancerRelatedMedicationRequest', 'MedicationRequest.encounter');
+        const elem = new ProfileElement(elemJson, metadata, defs, externalDependencyDefs);
+        expect(elem.row.elemType).toBe(
+            'Reference(Encounter)'
+        );
+    });
+
+    it('should detect reference type within polymorphic', () => {
+        const elemJson = findElementById([defs], 'CancerRelatedMedicationRequest', 'MedicationRequest.reported[x]');
+        const elem = new ProfileElement(elemJson, metadata, defs, externalDependencyDefs);
+        expect(elem.row.elemType).toContain(
+            'Reference(USCore'
+        );
+    });
+
+    it('should suppress static codes', () => {
+        const elemJson = findElementById([defs], 'CancerDiseaseStatus', 'Observation.code');
+        const elem = new ProfileElement(elemJson, metadata, defs, externalDependencyDefs);
+        expect(elem.toJSON()).toEqual([]);
+    });
+
+    it('should have value set url for fixed value sets', () => {
+        const elemJson = findElementById([defs], 'CancerDiseaseStatus', 'Observation.status');
+        const elem = new ProfileElement(elemJson, metadata, defs, externalDependencyDefs);
+        expect(elem.row.valueSet).toContain('http://hl7.org/fhir/ValueSet/observation-status');
+    });
+*/

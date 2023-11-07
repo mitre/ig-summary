@@ -1,0 +1,71 @@
+{
+    "name": "@mitre/ig-summary",
+    "version": "0.0.3",
+    "description": "Generates summaries of a FHIR Implementation Guide.",
+    "main": "dist/index.js",
+    "scripts": {
+        "build": "del-cli dist && tsc && chmod +x dist/ig-summary.js",
+        "check": "npm run test && npm run lint && npm run prettier",
+        "test": "jest --runInBand",
+        "test-clear-cache": "jest --clearCache",
+        "test:watch": "npm run test -- --watchAll --maxWorkers=12",
+        "coverage": "opener coverage/lcov-report/index.html",
+        "lint": "tsc && eslint \"**/*.{js,ts}\"",
+        "lint:fix": "tsc --noEmit && eslint \"**/*.{js,ts}\" --quiet --fix",
+        "prettier": "prettier --check \"**/*.{js,ts}\"",
+        "prettier:fix": "prettier --write \"**/*.{js,ts}\"",
+        "prepare": "npm run build",
+        "prepublishOnly": "npm run check"
+    },
+    "bin": {
+        "ig-summary": "./dist/ig-summary.js"
+    },
+    "types": "dist/ig-summary.d.ts",
+    "files": [
+        "dist/**/*.{js,json,d.ts}"
+    ],
+    "contributors": [
+        "Max Masnick <masnick@mitre.org>"
+    ],
+    "license": "Apache-2.0",
+    "devDependencies": {
+        "@types/antlr4": "^4.11.2",
+        "@types/fs-extra": "^9.0.13",
+        "@types/got": "^9.6.12",
+        "@types/jest": "^29.5.3",
+        "@types/js-yaml": "^4.0.5",
+        "@types/lodash": "^4.14.197",
+        "@types/node": "^12.20.55",
+        "@types/tar": "^6.1.5",
+        "@types/titlecase": "^1.1.0",
+        "@typescript-eslint/eslint-plugin": "^6.2.1",
+        "@typescript-eslint/parser": "^6.2.1",
+        "del-cli": "^5.0.0",
+        "eslint": "^8.46.0",
+        "eslint-config-prettier": "^8.10.0",
+        "got": "^11.8.6",
+        "jest": "^29.6.2",
+        "jest-extended": "^4.0.1",
+        "prettier": "^2.8.8",
+        "tar": "^5.0.11",
+        "ts-jest": "^29.1.1",
+        "ts-node": "^10.9.1",
+        "typescript": "^4.9.5"
+    },
+    "dependencies": {
+        "@types/marked": "^4.3.1",
+        "chalk": "^4.1.2",
+        "change-case": "^4.1.2",
+        "cli-table3": "^0.6.3",
+        "commander": "^10.0.1",
+        "exceljs": "^4.3.0",
+        "fs-extra": "^9.1.0",
+        "fsh-sushi": "^3.2.0",
+        "js-yaml": "^3.14.1",
+        "lodash": "^4.17.21",
+        "marked": "^4.3.0",
+        "node-notifier": "^10.0.1",
+        "titlecase": "^1.1.3",
+        "winston": "^3.10.0"
+    }
+}
