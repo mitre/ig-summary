@@ -81,7 +81,7 @@ Options:
 
 
 $ ig-summary diff --help
-Usage: ig-summary diff --a /path/to/a.json --b /path/to/b.json -o /path/to/output/ [options]
+Usage: ig-summary diff --a /path/to/a.json --b /path/to/b.json --output /path/to/output/ [options]
 
 Create a comparison ("diff") of the output of two different runs of the "create" command.
 
