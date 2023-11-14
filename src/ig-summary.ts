@@ -65,7 +65,7 @@ program
     
 See https://github.com/mitre/ig-summary for details.`
     )
-    .usage('--a /path/to/a.json --b /path/to/b.json -o /path/to/output/ [options]')
+    .usage('--a /path/to/a.json --b /path/to/b.json --output /path/to/output/ [options]')
     .requiredOption('--a <a>', 'path to file a')
     .requiredOption('--b <b>', 'path to file b')
     .requiredOption('--output <path>', 'output path')
