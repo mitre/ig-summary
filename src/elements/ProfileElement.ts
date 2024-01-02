@@ -31,6 +31,8 @@ export enum SpreadsheetColNames {
     FHIRElement = 'FHIR Element (R4)',
     SourceProfileURI = 'Source Profile URI',
     ElementStructureDefinitionURI = 'Element StructureDefinition URI',
+    UsedByMeasure = 'Used By Measure',
+    AssociatedWithValueSet = 'Associated With Value Set'
 }
 
 // Non-optional version of DataElementInformation, with proper row names
@@ -47,6 +49,8 @@ export type DataElementInformationForSpreadsheet = {
     [SpreadsheetColNames.FHIRElement]: string;
     [SpreadsheetColNames.SourceProfileURI]: string;
     [SpreadsheetColNames.ElementStructureDefinitionURI]: string;
+    [SpreadsheetColNames.UsedByMeasure]: string;
+    [SpreadsheetColNames.AssociatedWithValueSet]: string;
     [key: string]: string; // Adds an index signature to the type
 };
 
@@ -71,6 +75,8 @@ export class ProfileElement {
 
     // TODO this should not be `fhirtypes.Extension` -- this is the wrong type (even though it works)
     protected _structureDefinition: fhirtypes.Extension;
+    public usedByMeasure: string;
+    public associatedWithValueSet: string;
 
     constructor(
         elem: fhirtypes.ElementDefinition,
@@ -468,7 +474,9 @@ export class ProfileElement {
                 [SpreadsheetColNames.ValueSetBinding]: this.valueSet.binding,
                 [SpreadsheetColNames.FHIRElement]: fhirPath,
                 [SpreadsheetColNames.SourceProfileURI]: this.dataElementInformation.sourceProfileURI,
-                [SpreadsheetColNames.ElementStructureDefinitionURI]: this.dataElementInformation.elementStructureDefinitionURI
+                [SpreadsheetColNames.ElementStructureDefinitionURI]: this.dataElementInformation.elementStructureDefinitionURI,
+                [SpreadsheetColNames.UsedByMeasure]: this.usedByMeasure,
+                [SpreadsheetColNames.AssociatedWithValueSet]: this.associatedWithValueSet
             }
         ];
 
