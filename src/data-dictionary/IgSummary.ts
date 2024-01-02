@@ -267,19 +267,9 @@ export class IgSummary {
 
         let usedByMeasureMap = new Map<string, string>();
         let assoWithVSMap = new Map<string, string>();
-
         for (const sd of _.uniqBy(this.defs.allProfiles(), 'id')) {
             const snapshot = sd.snapshot;
-
-            // Skip abstract profiles
-            if (sd.abstract === true) {
-                continue;
-            }
-
-            // `title` is not a required element, but it is usually what we want in the human-readable output.
-            // If it doesn't exist, fall back to `name`.
             const profileTitle = sd.title || sd.name;
-
             // usedByMeasureMap and assoWithVSMap are temporary. Eventually extension flag can be included in DataElementInformation
             for (const elemJson of snapshot.element.slice(1)) {
                 let flg1:boolean = false;
@@ -288,9 +278,22 @@ export class IgSummary {
                     if (ext.url === 'http://hl7.org/fhir/us/qmcm/StructureDefinition/used-by-measure') flg1 = true;
                     if (ext.url === 'http://hl7.org/fhir/us/qmcm/StructureDefinition/associated-with-valueset') flg2 = true;
                 })
-                if (flg1) usedByMeasureMap.set(elemJson.id, 'true');
-                if (flg2) assoWithVSMap.set(elemJson.id, 'true');
+                if (flg1) usedByMeasureMap.set(profileTitle+elemJson.id, 'true');
+                if (flg2) assoWithVSMap.set(profileTitle+elemJson.id, 'true');
             }
+        }
+
+        for (const sd of _.uniqBy(this.defs.allProfiles(), 'id')) {
+            const snapshot = sd.snapshot;
+    
+            // Skip abstract profiles
+            if (sd.abstract === true) {
+                continue;
+            }
+
+            // `title` is not a required element, but it is usually what we want in the human-readable output.
+            // If it doesn't exist, fall back to `name`.
+            const profileTitle = sd.title || sd.name;
 
             // The `slice(1)` skips the first item in the array, which is information about the StructureDefinition
             // that isn't needed.
@@ -340,13 +343,14 @@ export class IgSummary {
                 });
 
                 if (deduplicatedElemToJson) profileElements = profileElements.concat(deduplicatedElemToJson);
-                
-                profileElements.forEach(pe => {
-                    pe[SpreadsheetColNames.UsedByMeasure] = usedByMeasureMap.get(pe[SpreadsheetColNames.FHIRElement]);
-                    pe[SpreadsheetColNames.AssociatedWithValueSet] = assoWithVSMap.get(pe[SpreadsheetColNames.FHIRElement]);
-                })
             }
+
         }
+
+        profileElements.forEach(pe => {
+            pe[SpreadsheetColNames.UsedByMeasure] = usedByMeasureMap.get(pe[SpreadsheetColNames.ProfileTitle]+pe[SpreadsheetColNames.FHIRElement]);
+            pe[SpreadsheetColNames.AssociatedWithValueSet] = assoWithVSMap.get(pe[SpreadsheetColNames.ProfileTitle]+pe[SpreadsheetColNames.FHIRElement]);
+        });
 
         // Get list of profiles, extensions, and value sets
         const allExtensions: DataDictionaryJsonSummaryRow[] = _.uniqBy(this.defs.allExtensions(), x => {
