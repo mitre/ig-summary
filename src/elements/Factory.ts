@@ -19,7 +19,6 @@ export abstract class ProfileElementFactory {
         ] = [elementDefinition, dataDictionaryElementMetadata, fhirDefinitions, settings];
 
         const elementClasses = [ProfileExtensionElement, ProfileBackboneElement, ProfileElement];
-
         for (const klass of elementClasses) {
             if (klass.canBeCreatedFrom(elementDefinition)) {
                 return new klass(...args);

@@ -253,7 +253,12 @@ export class IgSummary {
     public async generateSpreadsheet() {
         // Get external dependencies
         await this.getExternalDefs();
-
+        let excludeElements = [
+            'DeviceRequest.modifierExtension',
+            'DeviceRequest.modifierExtension:doNotPerform',
+            'Task.output.value[x]',
+            'Encounter.reasonReference',
+            'Claim.extension:encounter'];
         // Store data for CSV here
         let profileElements: Array<DataElementInformationForSpreadsheet> = [];
 
@@ -275,14 +280,15 @@ export class IgSummary {
                 let flg1:boolean = false;
                 let flg2:boolean = false;
                 elemJson.extension?.forEach((ext: any) => {
-                    if (ext.url === 'http://hl7.org/fhir/us/qmcm/StructureDefinition/used-by-measure') flg1 = true;
-                    if (ext.url === 'http://hl7.org/fhir/us/qmcm/StructureDefinition/associated-with-valueset') flg2 = true;
+                    console.log(ext.url);
+                    if (ext.url.includes('/StructureDefinition/used-by-measure')) flg1 = true;
+                    if (ext.url.includes('/StructureDefinition/associated-with-valueset')) flg2 = true;
                 })
                 if (flg1) usedByMeasureMap.set(profileTitle+elemJson.id, 'true');
                 if (flg2) assoWithVSMap.set(profileTitle+elemJson.id, 'true');
             }
         }
-
+        
         for (const sd of _.uniqBy(this.defs.allProfiles(), 'id')) {
             const snapshot = sd.snapshot;
     
@@ -298,6 +304,11 @@ export class IgSummary {
             // The `slice(1)` skips the first item in the array, which is information about the StructureDefinition
             // that isn't needed.
             for (const elemJson of snapshot.element.slice(1)) {
+                console.log(elemJson.id);
+                if (excludeElements.includes(elemJson.id)) {
+                    continue;
+                }
+
                 if (
                     this.settings.mode == DataDictionaryMode.MustSupport &&
                     !(
@@ -323,7 +334,7 @@ export class IgSummary {
                     [this.defs, this.externalDefs],
                     this.settings
                 );
-
+                
                 const elemToJson = elem.toJSON();
                 // Filter down to unique elements -- there may be duplicates because extension ProfileElement objects
                 // automatically add sub-elements.
@@ -440,7 +451,7 @@ export class IgSummary {
             size: 16
         };
         [
-            ['', 'IG name', this.sushiConfig.title],
+            ['', 'IG name', this.sushiConfig.name],
             ['', 'IG URL', this.sushiConfig.url],
             ['', 'IG version', this.sushiConfig.version],
             ['', 'IG status', this.sushiConfig.status],
