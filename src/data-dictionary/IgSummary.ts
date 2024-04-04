@@ -280,7 +280,7 @@ export class IgSummary {
                 let flg1:boolean = false;
                 let flg2:boolean = false;
                 elemJson.extension?.forEach((ext: any) => {
-                    console.log(ext.url);
+                    // console.log(ext.url);
                     if (ext.url.includes('/StructureDefinition/used-by-measure')) flg1 = true;
                     if (ext.url.includes('/StructureDefinition/associated-with-valueset')) flg2 = true;
                 })
@@ -304,7 +304,7 @@ export class IgSummary {
             // The `slice(1)` skips the first item in the array, which is information about the StructureDefinition
             // that isn't needed.
             for (const elemJson of snapshot.element.slice(1)) {
-                console.log(elemJson.id);
+                // console.log(elemJson.id);
                 if (excludeElements.includes(elemJson.id)) {
                     continue;
                 }
