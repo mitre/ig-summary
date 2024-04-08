@@ -282,10 +282,10 @@ export class IgSummary {
                 elemJson.extension?.forEach((ext: any) => {
                     // console.log(ext.url);
                     if (ext.url.includes('/StructureDefinition/used-by-measure')) flg1 = true;
-                    if (ext.url.includes('/StructureDefinition/associated-with-valueset')) flg2 = true;
+                //    if (ext.url.includes('/StructureDefinition/associated-with-valueset')) flg2 = true;
                 })
                 if (flg1) usedByMeasureMap.set(profileTitle+elemJson.id, 'true');
-                if (flg2) assoWithVSMap.set(profileTitle+elemJson.id, 'true');
+                //if (flg2) assoWithVSMap.set(profileTitle+elemJson.id, 'true');
             }
         }
         
@@ -360,7 +360,7 @@ export class IgSummary {
 
         profileElements.forEach(pe => {
             pe[SpreadsheetColNames.UsedByMeasure] = usedByMeasureMap.get(pe[SpreadsheetColNames.ProfileTitle]+pe[SpreadsheetColNames.FHIRElement]);
-            pe[SpreadsheetColNames.AssociatedWithValueSet] = assoWithVSMap.get(pe[SpreadsheetColNames.ProfileTitle]+pe[SpreadsheetColNames.FHIRElement]);
+        //   pe[SpreadsheetColNames.AssociatedWithValueSet] = assoWithVSMap.get(pe[SpreadsheetColNames.ProfileTitle]+pe[SpreadsheetColNames.FHIRElement]);
         });
 
         // Get list of profiles, extensions, and value sets
