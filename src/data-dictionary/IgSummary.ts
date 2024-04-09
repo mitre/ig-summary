@@ -9,7 +9,8 @@ import {logger} from '../util/logger';
 import {ProfileGroupExtractor, ProfileGroups} from '../profile_groups';
 import {
     DataElementInformation,
-    DataElementInformationForSpreadsheet
+    DataElementInformationForSpreadsheet,
+    SpreadsheetColNames
 } from '../elements/ProfileElement';
 import {ProfileElementFactory} from '../elements/Factory';
 import {
@@ -252,7 +253,12 @@ export class IgSummary {
     public async generateSpreadsheet() {
         // Get external dependencies
         await this.getExternalDefs();
-
+        let excludeElements = [
+            'DeviceRequest.modifierExtension',
+            'DeviceRequest.modifierExtension:doNotPerform',
+            'Task.output.value[x]',
+            'Encounter.reasonReference',
+            'Claim.extension:encounter'];
         // Store data for CSV here
         let profileElements: Array<DataElementInformationForSpreadsheet> = [];
 
@@ -263,9 +269,29 @@ export class IgSummary {
             logger.error(`No profiles found in ${this.fhirDefFolder}.`);
             return;
         }
+
+        let usedByMeasureMap = new Map<string, string>();
+        let assoWithVSMap = new Map<string, string>();
         for (const sd of _.uniqBy(this.defs.allProfiles(), 'id')) {
             const snapshot = sd.snapshot;
-
+            const profileTitle = sd.title || sd.name;
+            // usedByMeasureMap and assoWithVSMap are temporary. Eventually extension flag can be included in DataElementInformation
+            for (const elemJson of snapshot.element.slice(1)) {
+                let flg1:boolean = false;
+                let flg2:boolean = false;
+                elemJson.extension?.forEach((ext: any) => {
+                    // console.log(ext.url);
+                    if (ext.url.includes('/StructureDefinition/used-by-measure')) flg1 = true;
+                //    if (ext.url.includes('/StructureDefinition/associated-with-valueset')) flg2 = true;
+                })
+                if (flg1) usedByMeasureMap.set(profileTitle+elemJson.id, 'true');
+                //if (flg2) assoWithVSMap.set(profileTitle+elemJson.id, 'true');
+            }
+        }
+        
+        for (const sd of _.uniqBy(this.defs.allProfiles(), 'id')) {
+            const snapshot = sd.snapshot;
+    
             // Skip abstract profiles
             if (sd.abstract === true) {
                 continue;
@@ -278,6 +304,11 @@ export class IgSummary {
             // The `slice(1)` skips the first item in the array, which is information about the StructureDefinition
             // that isn't needed.
             for (const elemJson of snapshot.element.slice(1)) {
+                // console.log(elemJson.id);
+                if (excludeElements.includes(elemJson.id)) {
+                    continue;
+                }
+
                 if (
                     this.settings.mode == DataDictionaryMode.MustSupport &&
                     !(
@@ -303,7 +334,7 @@ export class IgSummary {
                     [this.defs, this.externalDefs],
                     this.settings
                 );
-
+                
                 const elemToJson = elem.toJSON();
                 // Filter down to unique elements -- there may be duplicates because extension ProfileElement objects
                 // automatically add sub-elements.
@@ -324,7 +355,13 @@ export class IgSummary {
 
                 if (deduplicatedElemToJson) profileElements = profileElements.concat(deduplicatedElemToJson);
             }
+
         }
+
+        profileElements.forEach(pe => {
+            pe[SpreadsheetColNames.UsedByMeasure] = usedByMeasureMap.get(pe[SpreadsheetColNames.ProfileTitle]+pe[SpreadsheetColNames.FHIRElement]);
+        //   pe[SpreadsheetColNames.AssociatedWithValueSet] = assoWithVSMap.get(pe[SpreadsheetColNames.ProfileTitle]+pe[SpreadsheetColNames.FHIRElement]);
+        });
 
         // Get list of profiles, extensions, and value sets
         const allExtensions: DataDictionaryJsonSummaryRow[] = _.uniqBy(this.defs.allExtensions(), x => {
@@ -414,7 +451,7 @@ export class IgSummary {
             size: 16
         };
         [
-            ['', 'IG name', this.sushiConfig.title],
+            ['', 'IG name', this.sushiConfig.name],
             ['', 'IG URL', this.sushiConfig.url],
             ['', 'IG version', this.sushiConfig.version],
             ['', 'IG status', this.sushiConfig.status],
