@@ -93,7 +93,6 @@ export class IgSummary {
         }
         this.outputDir = outputDir;
 
-
         if (logLevel === 'debug' || logLevel === 'warn' || logLevel === 'error') {
             logger.level = logLevel; // ig-data-dictionary logger
             fshutils.logger.level = logLevel; // SUSHI logger
@@ -253,12 +252,7 @@ export class IgSummary {
     public async generateSpreadsheet() {
         // Get external dependencies
         await this.getExternalDefs();
-        let excludeElements = [
-            'DeviceRequest.modifierExtension',
-            'DeviceRequest.modifierExtension:doNotPerform',
-            'Task.output.value[x]',
-            'Encounter.reasonReference',
-            'Claim.extension:encounter'];
+        
         // Store data for CSV here
         let profileElements: Array<DataElementInformationForSpreadsheet> = [];
 
@@ -277,15 +271,11 @@ export class IgSummary {
             const profileTitle = sd.title || sd.name;
             // usedByMeasureMap and assoWithVSMap are temporary. Eventually extension flag can be included in DataElementInformation
             for (const elemJson of snapshot.element.slice(1)) {
-                let flg1:boolean = false;
-                let flg2:boolean = false;
+                let extension_flg:boolean = false;
                 elemJson.extension?.forEach((ext: any) => {
-                    // console.log(ext.url);
-                    if (ext.url.includes('/StructureDefinition/used-by-measure')) flg1 = true;
-                //    if (ext.url.includes('/StructureDefinition/associated-with-valueset')) flg2 = true;
+                    if (ext.url.includes('/StructureDefinition/used-by-measure')) extension_flg = true;
                 })
-                if (flg1) usedByMeasureMap.set(profileTitle+elemJson.id, 'true');
-                //if (flg2) assoWithVSMap.set(profileTitle+elemJson.id, 'true');
+                if (extension_flg) usedByMeasureMap.set(profileTitle+elemJson.id, 'true');
             }
         }
         
@@ -304,8 +294,8 @@ export class IgSummary {
             // The `slice(1)` skips the first item in the array, which is information about the StructureDefinition
             // that isn't needed.
             for (const elemJson of snapshot.element.slice(1)) {
-                // console.log(elemJson.id);
-                if (excludeElements.includes(elemJson.id)) {
+                if (this.settings.excludeElement?.includes(elemJson.id)) {
+                    logger.warn(`${elemJson.id} wasn't included in the output summary report`);
                     continue;
                 }
 
@@ -749,5 +739,4 @@ export class IgSummary {
             differ.logSummary();
         }
     }
-
 }
