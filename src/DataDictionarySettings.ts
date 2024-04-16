@@ -14,6 +14,7 @@ export type DataDictionarySettings = {
     informationTabContent?: { [key: string]: string };
     touchUpHumanizedElementNames?: { [key: string]: string };
     suppressFixedCodes?: boolean;
+    extensionColumn?: string[];
     excludeElement?: string[]
 };
 

@@ -264,18 +264,18 @@ export class IgSummary {
             return;
         }
 
-        let usedByMeasureMap = new Map<string, string>();
-        let assoWithVSMap = new Map<string, string>();
+        let extensionFlgMap = new Map<string, string>();
+        
         for (const sd of _.uniqBy(this.defs.allProfiles(), 'id')) {
             const snapshot = sd.snapshot;
             const profileTitle = sd.title || sd.name;
-            // usedByMeasureMap and assoWithVSMap are temporary. Eventually extension flag can be included in DataElementInformation
+
             for (const elemJson of snapshot.element.slice(1)) {
                 let extension_flg:boolean = false;
                 elemJson.extension?.forEach((ext: any) => {
-                    if (ext.url.includes('/StructureDefinition/used-by-measure')) extension_flg = true;
+                    if (ext.url.includes('/StructureDefinition/'+this.settings.extensionColumn)) extension_flg = true;
                 })
-                if (extension_flg) usedByMeasureMap.set(profileTitle+elemJson.id, 'true');
+                if (extension_flg) extensionFlgMap.set(profileTitle+elemJson.id, 'true');
             }
         }
         
@@ -347,10 +347,9 @@ export class IgSummary {
             }
 
         }
-
+        
         profileElements.forEach(pe => {
-            pe[SpreadsheetColNames.UsedByMeasure] = usedByMeasureMap.get(pe[SpreadsheetColNames.ProfileTitle]+pe[SpreadsheetColNames.FHIRElement]);
-        //   pe[SpreadsheetColNames.AssociatedWithValueSet] = assoWithVSMap.get(pe[SpreadsheetColNames.ProfileTitle]+pe[SpreadsheetColNames.FHIRElement]);
+            pe[SpreadsheetColNames.Extension] = extensionFlgMap.get(pe[SpreadsheetColNames.ProfileTitle]+pe[SpreadsheetColNames.FHIRElement]);
         });
 
         // Get list of profiles, extensions, and value sets
@@ -440,6 +439,7 @@ export class IgSummary {
             bold: true,
             size: 16
         };
+
         [
             ['', 'IG name', this.sushiConfig.name],
             ['', 'IG URL', this.sushiConfig.url],
@@ -451,6 +451,8 @@ export class IgSummary {
             ['', '# Extensions', allExtensions.length],
             ['', '# Value Sets', allValueSets.length],
             ['', '# Code Systems', allCodeSystems.length],
+            [''],
+            ['', 'Extension type used for Extension? column', this.settings.extensionColumn],
             [''],
             ['', 'Data dictionary generated date', new Date().toLocaleString('en-US')]
         ].forEach(line => {
@@ -567,6 +569,11 @@ export class IgSummary {
         hiddenCol.hidden = true;
         hiddenCol = profileElementsWorksheet.getColumn(12);
         hiddenCol.hidden = true;
+        // Hide Extension? column unless extension info exists in the settings
+        if (!this.settings.extensionColumn) {
+            hiddenCol = profileElementsWorksheet.getColumn(13);
+            hiddenCol.hidden = true;
+        }
 
         // Hide group column if it's all default
         hiddenCol = profileElementsWorksheet.getColumn(1);

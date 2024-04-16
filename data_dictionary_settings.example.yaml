@@ -8,3 +8,5 @@ excludeElement: [
   'Task.output.value[x]',
   'Encounter.reasonReference',
   'Claim.extension:encounter']
+
+extensionColumn: 'used-by-measure'
