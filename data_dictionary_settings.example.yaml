@@ -9,4 +9,6 @@ excludeElement: [
   'Encounter.reasonReference',
   'Claim.extension:encounter']
 
-extensionColumn: 'used-by-measure'
+extensionColumn: [
+  'used-by-measure', 
+  'associated-with-valueset']

@@ -255,7 +255,7 @@ export class IgSummary {
         
         // Store data for CSV here
         let profileElements: Array<DataElementInformationForSpreadsheet> = [];
-
+        
         // Iterate through StructureDefinitions
         // Note that SUSHI creates duplicate objects for each Profile because it wants to index by URL, ID, and name.
         // `_.uniqBy()` cleans this up.
@@ -271,14 +271,15 @@ export class IgSummary {
             const profileTitle = sd.title || sd.name;
 
             for (const elemJson of snapshot.element.slice(1)) {
-                let extension_flg:boolean = false;
+                // let extension_flg:boolean = false;
                 elemJson.extension?.forEach((ext: any) => {
-                    if (ext.url.includes('/StructureDefinition/'+this.settings.extensionColumn)) extension_flg = true;
+                    this.settings.extensionColumn.forEach((col:string) => {
+                        if (ext.url.includes('/StructureDefinition/' + col)) extensionFlgMap.set(profileTitle+elemJson.id+col, 'true');
+                    })
                 })
-                if (extension_flg) extensionFlgMap.set(profileTitle+elemJson.id, 'true');
             }
         }
-        
+
         for (const sd of _.uniqBy(this.defs.allProfiles(), 'id')) {
             const snapshot = sd.snapshot;
     
@@ -347,10 +348,6 @@ export class IgSummary {
             }
 
         }
-        
-        profileElements.forEach(pe => {
-            pe[SpreadsheetColNames.Extension] = extensionFlgMap.get(pe[SpreadsheetColNames.ProfileTitle]+pe[SpreadsheetColNames.FHIRElement]);
-        });
 
         // Get list of profiles, extensions, and value sets
         const allExtensions: DataDictionaryJsonSummaryRow[] = _.uniqBy(this.defs.allExtensions(), x => {
@@ -539,7 +536,22 @@ export class IgSummary {
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+        // Add extension columns dynamically
         const profileElementsWorksheet = workbook.addWorksheet('Data elements');
+        let col = Object.keys(profileElements[0]).map(k => {
+            return { name: k, key: k, filterButton: true };
+        });
+
+        this.settings.extensionColumn?.forEach ((ec: string) => {
+            col.push({ name: ec, key: ec, filterButton: true });
+        })
+
+        profileElements.forEach(pe => {
+            this.settings.extensionColumn?.forEach ((ec: string) => {
+                pe[ec] = extensionFlgMap.get(pe[SpreadsheetColNames.ProfileTitle]+pe[SpreadsheetColNames.FHIRElement]+ec);
+            })
+        });
+        
         // Add table
         profileElementsWorksheet.addTable({
             name: 'profile_data_elements',
@@ -550,9 +562,7 @@ export class IgSummary {
                 theme: 'TableStyleMedium2',
                 showRowStripes: true
             },
-            columns: Object.keys(profileElements[0]).map(k => {
-                return {name: k, key: k, filterButton: true};
-            }),
+            columns: col,
             rows: profileElements.map(k => {
                 return Object.values(k);
             })
@@ -569,11 +579,6 @@ export class IgSummary {
         hiddenCol.hidden = true;
         hiddenCol = profileElementsWorksheet.getColumn(12);
         hiddenCol.hidden = true;
-        // Hide Extension? column unless extension info exists in the settings
-        if (!this.settings.extensionColumn) {
-            hiddenCol = profileElementsWorksheet.getColumn(13);
-            hiddenCol.hidden = true;
-        }
 
         // Hide group column if it's all default
         hiddenCol = profileElementsWorksheet.getColumn(1);
