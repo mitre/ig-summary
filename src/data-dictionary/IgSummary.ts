@@ -268,13 +268,12 @@ export class IgSummary {
         
         for (const sd of _.uniqBy(this.defs.allProfiles(), 'id')) {
             const snapshot = sd.snapshot;
-            const profileTitle = sd.title || sd.name;
-
+            
             for (const elemJson of snapshot.element.slice(1)) {
-                // let extension_flg:boolean = false;
                 elemJson.extension?.forEach((ext: any) => {
-                    this.settings.extensionColumn.forEach((col:string) => {
-                        if (ext.url.includes('/StructureDefinition/' + col)) extensionFlgMap.set(profileTitle+elemJson.id+col, 'true');
+                    this.settings.extensionColumn?.forEach((col:string) => {
+                        console.log(sd.title+elemJson.id+col);
+                        if (ext.url.includes('/StructureDefinition/' + col)) extensionFlgMap.set(sd.title+elemJson.id+col, 'true');
                     })
                 })
             }
@@ -439,6 +438,7 @@ export class IgSummary {
 
         [
             ['', 'IG name', this.sushiConfig.name],
+            ['', 'IG title', this.sushiConfig.title],
             ['', 'IG URL', this.sushiConfig.url],
             ['', 'IG version', this.sushiConfig.version],
             ['', 'IG status', this.sushiConfig.status],

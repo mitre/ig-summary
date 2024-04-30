@@ -11,4 +11,5 @@ excludeElement: [
 
 extensionColumn: [
   'used-by-measure', 
-  'associated-with-valueset']
+  'associated-with-valueset'
+  ]
