@@ -272,7 +272,6 @@ export class IgSummary {
             for (const elemJson of snapshot.element.slice(1)) {
                 elemJson.extension?.forEach((ext: any) => {
                     this.settings.extensionColumn?.forEach((col:string) => {
-                        console.log(sd.title+elemJson.id+col);
                         if (ext.url.includes('/StructureDefinition/' + col)) extensionFlgMap.set(sd.title+elemJson.id+col, 'true');
                     })
                 })
