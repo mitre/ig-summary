@@ -1,7 +1,8 @@
 module.exports = {
     moduleFileExtensions: ['js', 'ts'],
     transform: {
-        '^.+\\.(js|jsx|ts|tsx)$': ['ts-jest',
+        '^.+\\.(js|jsx|ts|tsx)$': [
+            'ts-jest',
             {
                 'ts-jest': {
                     tsconfig: '<rootDir>/test/tsconfig.json'
@@ -14,6 +15,3 @@ module.exports = {
     setupFilesAfterEnv: ['jest-extended/all', '<rootDir>/test/testSetup.ts'],
     preset: 'ts-jest'
 };
-
-
-

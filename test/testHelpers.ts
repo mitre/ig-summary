@@ -1,9 +1,9 @@
-import {DataElementInformation} from '../src/elements/ProfileElement';
-import {ProfileElementFactory} from '../src/elements/Factory';
-import {DataDictionaryMode, DataDictionarySettings} from '../src/DataDictionarySettings';
-import {FixturePackageNames, fixturePackages} from './testSetup';
-import {IgSummary} from '../src/data-dictionary/IgSummary';
-import {StructureDefinition} from 'fsh-sushi/dist/fhirtypes';
+import { DataElementInformation } from '../src/elements/ProfileElement';
+import { ProfileElementFactory } from '../src/elements/Factory';
+import { DataDictionaryMode, DataDictionarySettings } from '../src/DataDictionarySettings';
+import { FixturePackageNames, fixturePackages } from './testSetup';
+import { IgSummary } from '../src/data-dictionary/IgSummary';
+import { StructureDefinition } from 'fsh-sushi/dist/fhirtypes';
 import fs from 'fs-extra';
 import got from 'got';
 import tar from 'tar';
@@ -24,10 +24,10 @@ export class BootstrappedFixture {
          *
          * Called as the first line in `getElement(...)` below.
          */
-        if(this.igSummary === undefined) {
+        if (this.igSummary === undefined) {
             // Check to see if the IG release in question has been cached locally yet
             const fixtureBootstrapPath = 'test/fixtures/bootstrap/';
-            fs.mkdirSync(fixtureBootstrapPath, {recursive: true});
+            fs.mkdirSync(fixtureBootstrapPath, { recursive: true });
             const fixtureUrl = fixturePackages[this.fixtureEnum];
             const path = `${fixtureBootstrapPath}${this.fixtureEnum}`;
             if (!fs.existsSync(path)) {
@@ -45,7 +45,7 @@ export class BootstrappedFixture {
                 });
 
                 // Unzip the file
-                await tar.extract({file: path + '.tgz', cwd: fixtureBootstrapPath});
+                await tar.extract({ file: path + '.tgz', cwd: fixtureBootstrapPath });
                 fs.moveSync(`${fixtureBootstrapPath}package`, path);
 
                 console.log('File downloaded and unzipped successfully');
@@ -58,28 +58,39 @@ export class BootstrappedFixture {
             });
 
             // Load dependencies if needed
-            if(this.loadDependencies === true && this.igSummary.externalDefs === undefined) {
+            if (this.loadDependencies === true && this.igSummary.externalDefs === undefined) {
                 await this.igSummary.getExternalDefs();
-                if(this.fixtureEnum === FixturePackageNames.MCODE_STU1 || this.fixtureEnum === FixturePackageNames.MCODE_STU2) {
+                if (
+                    this.fixtureEnum === FixturePackageNames.MCODE_STU1 ||
+                    this.fixtureEnum === FixturePackageNames.MCODE_STU2
+                ) {
                     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                     // @ts-ignore
-                    if(this.igSummary.externalDefs.fishForFHIR('http://hl7.org/fhir/us/core/StructureDefinition/us-core-birthsex') === undefined) {
+                    if (
+                        this.igSummary.externalDefs.fishForFHIR(
+                            'http://hl7.org/fhir/us/core/StructureDefinition/us-core-birthsex'
+                        ) === undefined
+                    ) {
                         throw 'Could not find http://hl7.org/fhir/us/core/StructureDefinition/us-core-birthsex';
                     }
                 }
-            }
-            else if (this.loadDependencies === false) {
+            } else if (this.loadDependencies === false) {
                 this.igSummary.sushiConfig.dependencies = [];
             }
         }
     }
 
-    public async getElement(profileIdentifier: string, elementId: string, mustSupport?: boolean, settings?: DataDictionarySettings) {
+    public async getElement(
+        profileIdentifier: string,
+        elementId: string,
+        mustSupport?: boolean,
+        settings?: DataDictionarySettings
+    ) {
         await this.setup();
 
         const profile = this.igSummary.defs.fishForFHIR(profileIdentifier);
 
-        if(profile === undefined) {
+        if (profile === undefined) {
             throw `Could not find profile with identifier <${profileIdentifier}>`;
         }
 
@@ -100,15 +111,20 @@ export class BootstrappedFixture {
         };
 
         // Make sure settings mode is consistent with settings boolean
-        if(settings !== undefined && settings.mode != (mustSupport ? DataDictionaryMode.MustSupport : DataDictionaryMode.All)) {
-            throw 'Settings mode and boolean don\'t match.';
+        if (
+            settings !== undefined &&
+            settings.mode != (mustSupport ? DataDictionaryMode.MustSupport : DataDictionaryMode.All)
+        ) {
+            throw "Settings mode and boolean don't match.";
         }
 
         const elem = ProfileElementFactory.getElement(
             fhirElem,
             metadata,
             [this.igSummary.defs, this.igSummary.externalDefs],
-            settings === undefined ? { mode: mustSupport ? DataDictionaryMode.MustSupport : DataDictionaryMode.All } : settings
+            settings === undefined
+                ? { mode: mustSupport ? DataDictionaryMode.MustSupport : DataDictionaryMode.All }
+                : settings
         );
 
         return {
@@ -116,7 +132,5 @@ export class BootstrappedFixture {
             elem: elem,
             row: elem.toJSON()
         };
-
     }
-
 }

@@ -15,7 +15,7 @@ export type DataDictionarySettings = {
     touchUpHumanizedElementNames?: { [key: string]: string };
     suppressFixedCodes?: boolean;
     extensionColumn?: string[];
-    excludeElement?: string[]
+    excludeElement?: string[];
 };
 
 export function loadSettingsFromYaml(settingsPath: string): DataDictionarySettings {

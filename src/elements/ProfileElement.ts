@@ -2,7 +2,7 @@ import toTitleCase from 'titlecase';
 import { fhirdefs, fhirtypes, fshtypes, utils as fshutils } from 'fsh-sushi';
 import { logger } from '../util/logger';
 import { DataDictionaryMode, DataDictionarySettings } from '../DataDictionarySettings';
-import {StructureDefinition} from 'fsh-sushi/dist/fhirtypes';
+// import {StructureDefinition} from 'fsh-sushi/dist/fhirtypes';
 
 export type ValueSetData = { uri: string; binding: string };
 
@@ -301,7 +301,9 @@ export class ProfileElement {
     // TODO Extension is the wrong type; fix this
     get structureDefinition(): fhirtypes.Extension {
         if (this._structureDefinition) return this._structureDefinition;
-        this._structureDefinition = this.fishEverywhere(this.dataElementInformation.sourceProfileURI);
+        this._structureDefinition = this.fishEverywhere(
+            this.dataElementInformation.sourceProfileURI
+        );
         if (this._structureDefinition === undefined) {
             throw `Could not find extension definition for ${this.dataElementInformation.sourceProfileURI} in ${this.dataElementInformation.profileTitle}`;
         }
@@ -326,7 +328,7 @@ export class ProfileElement {
             new RegExp(`(.*):${this.elem.sliceName}$`),
             '$1'
         );
-        if (this.findSiblingsWithStart(idWithoutSliceName + ':').length != 1){
+        if (this.findSiblingsWithStart(idWithoutSliceName + ':').length != 1) {
             return false;
         }
 
@@ -415,10 +417,12 @@ export class ProfileElement {
                 'code' in coding[0]
             ) {
                 // If suppressFixedCodes setting is on, then suppress
-                if(this.dataDictionarySettings.suppressFixedCodes === true) return [];
+                if (this.dataDictionarySettings.suppressFixedCodes === true) return [];
 
                 // Otherwise, add string onto the `Required` column indicating a fixed value
-                required += `${required ? ' ' : ''}[Fixed to ${coding[0].system}#${coding[0].code}]`;
+                required += `${required ? ' ' : ''}[Fixed to ${coding[0].system}#${
+                    coding[0].code
+                }]`;
             }
         }
 
@@ -467,15 +471,18 @@ export class ProfileElement {
                 [SpreadsheetColNames.ValueSetURI]: this.valueSet.uri,
                 [SpreadsheetColNames.ValueSetBinding]: this.valueSet.binding,
                 [SpreadsheetColNames.FHIRElement]: fhirPath,
-                [SpreadsheetColNames.SourceProfileURI]: this.dataElementInformation.sourceProfileURI,
-                [SpreadsheetColNames.ElementStructureDefinitionURI]: this.dataElementInformation.elementStructureDefinitionURI
+                [SpreadsheetColNames.SourceProfileURI]:
+                    this.dataElementInformation.sourceProfileURI,
+                [SpreadsheetColNames.ElementStructureDefinitionURI]:
+                    this.dataElementInformation.elementStructureDefinitionURI
             }
         ];
 
         for (const e of this.subElements) {
             // Rewrite Profile URI field so that it always contains the URI of the primary profile, rather
             // than the profile for e.g., an extension.
-            e.dataElementInformation.sourceProfileURI = this.dataElementInformation.sourceProfileURI;
+            e.dataElementInformation.sourceProfileURI =
+                this.dataElementInformation.sourceProfileURI;
             out = out.concat(e.toJSON());
         }
 
@@ -517,7 +524,7 @@ export class ProfileElement {
      */
     public findAllSiblingSlices(): fhirtypes.ElementDefinition[] {
         // Raise an exception if this is not a slice
-        if(this.elem.sliceName == undefined) throw `${this.elem.path} is not a slice`;
+        if (this.elem.sliceName == undefined) throw `${this.elem.path} is not a slice`;
 
         // slicedElement() finds the "parent" of the current slice
         return this.elem.slicedElement().getSlices();

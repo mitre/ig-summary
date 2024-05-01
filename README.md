@@ -151,7 +151,7 @@ Both the `ig-summary create` and `ig-summary diff` commands support settings fil
       'DeviceRequest.modifierExtension:doNotPerform',
       'Task.output.value[x]']
     
-    # Include additional columns to capture use of specific extensions (Extension names will be column names in the ProfileElement tab)
+    # Include additional columns in the ProfileElement tab to capture use of specific extensions 
     extensionColumn: [
       'used-by-measure', 
       'associated-with-valueset']
