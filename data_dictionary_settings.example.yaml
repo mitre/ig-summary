@@ -10,6 +10,8 @@ excludeElement: [
   'Claim.extension:encounter']
 
 extensionColumn: [
-  'used-by-measure', 
-  'associated-with-valueset'
-  ]
+  'uscdi-requirement',
+  'qicore-keyelement'
+]
+
+filename: 'data_dictionary'
