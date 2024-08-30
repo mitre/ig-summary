@@ -144,6 +144,17 @@ Both the `ig-summary create` and `ig-summary diff` commands support settings fil
     # If the primary audience for the IG summary are clinical SMEs, including all the fixed codes
     # may be unnecessarily noisy.
     suppressedFixedCodes: false
+
+    # List of specific elements to be excluded while generating summary
+    excludeElement: [
+      'DeviceRequest.modifierExtension',
+      'DeviceRequest.modifierExtension:doNotPerform',
+      'Task.output.value[x]']
+    
+    # Include additional columns in the ProfileElement tab to capture use of specific extensions 
+    extensionColumn: [
+      'used-by-measure', 
+      'associated-with-valueset']
     ```
 
 -   Annotated settings file example for the `ig-summary diff` command:

@@ -1,7 +1,7 @@
 import { ValueSet } from '../../src/data-dictionary/ValueSet';
-import _ from 'lodash';
+// import _ from 'lodash';
 
-import {mcode_stu1} from './../testSetup';
+import { mcode_stu1 } from './../testSetup';
 
 describe('ValueSet', () => {
     test('should get codes in value set', async () => {

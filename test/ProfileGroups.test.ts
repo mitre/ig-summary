@@ -1,5 +1,5 @@
 import { ProfileGroupExtractor } from '../src/profile_groups';
-import {sdoh_clin_care_stu2, sushiConfig} from './testSetup';
+import { sdoh_clin_care_stu2, sushiConfig } from './testSetup';
 
 /*
 Note that support for groups only works with sushi-config.yaml, which isn't present in the bootstrapped

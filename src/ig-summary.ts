@@ -70,7 +70,8 @@ See https://github.com/mitre/ig-summary for details.`
     .requiredOption('--b <b>', 'path to file b')
     .requiredOption('--output <path>', 'output path')
     .option('--settings <path>', 'path to settings .yaml file; see project README for details')
-    .action(options => {
+    .action((options, command) => {
+        console.log(command.opts());
         diff(
             path.resolve(options.a),
             path.resolve(options.b),

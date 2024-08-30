@@ -1,23 +1,24 @@
 import path from 'path';
 import fs from 'fs-extra';
 import ExcelJS from 'exceljs';
-import {fhirdefs, utils as fshutils} from 'fsh-sushi';
+import { fhirdefs, utils as fshutils } from 'fsh-sushi';
 import * as _ from 'lodash';
 import * as changeCase from 'change-case';
 
-import {logger} from '../util/logger';
-import {ProfileGroupExtractor, ProfileGroups} from '../profile_groups';
+import { logger } from '../util/logger';
+import { ProfileGroupExtractor, ProfileGroups } from '../profile_groups';
 import {
     DataElementInformation,
-    DataElementInformationForSpreadsheet
+    DataElementInformationForSpreadsheet,
+    SpreadsheetColNames
 } from '../elements/ProfileElement';
-import {ProfileElementFactory} from '../elements/Factory';
+import { ProfileElementFactory } from '../elements/Factory';
 import {
     DataDictionaryMode,
     DataDictionarySettings,
     loadSettingsFromYaml
 } from '../DataDictionarySettings';
-import {loadFromPath} from '../util/loadFromPath';
+import { loadFromPath } from '../util/loadFromPath';
 import {
     autosizeColumns,
     getVersion,
@@ -27,14 +28,11 @@ import {
     setProfileElementsView,
     setTableView
 } from '../util/util';
-import {Differ} from '../data-dictionary-diff/Differ';
-import {ValueSet, ValueSetRow} from './ValueSet';
+import { Differ } from '../data-dictionary-diff/Differ';
+import { ValueSet, ValueSetRow } from './ValueSet';
 import toTitleCase from 'titlecase';
-import {
-    DataDictionaryJson,
-    DataDictionaryJsonSummaryRow
-} from './DataDictionaryJson';
-import {Configuration} from 'fsh-sushi/dist/fshtypes';
+import { DataDictionaryJson, DataDictionaryJsonSummaryRow } from './DataDictionaryJson';
+import { Configuration } from 'fsh-sushi/dist/fshtypes';
 
 interface IGSummaryConstructor {
     igDir: string;
@@ -72,7 +70,14 @@ export class IgSummary {
      * @param mode `ms` or `all` for "only MustSupport elements" or "all elements"
      * @param settingsPath Path to settings YAML file
      */
-    constructor({igDir, outputDir, logLevel, comparisonPath, mode, settingsPath}: IGSummaryConstructor) {
+    constructor({
+        igDir,
+        outputDir,
+        logLevel,
+        comparisonPath,
+        mode,
+        settingsPath
+    }: IGSummaryConstructor) {
         logger.info(`Starting ${getVersion()}`);
 
         this.comparisonPath = comparisonPath;
@@ -91,7 +96,6 @@ export class IgSummary {
             process.exit();
         }
         this.outputDir = outputDir;
-
 
         if (logLevel === 'debug' || logLevel === 'warn' || logLevel === 'error') {
             logger.level = logLevel; // ig-data-dictionary logger
@@ -142,7 +146,9 @@ export class IgSummary {
     get hasSushiConfig(): boolean {
         if (this._hasSushiConfig !== undefined) return this._hasSushiConfig;
 
-        this._hasSushiConfig = fs.existsSync(path.join(fs.realpathSync(this.igDir), 'sushi-config.yaml'));
+        this._hasSushiConfig = fs.existsSync(
+            path.join(fs.realpathSync(this.igDir), 'sushi-config.yaml')
+        );
         return this._hasSushiConfig;
     }
 
@@ -159,7 +165,9 @@ export class IgSummary {
 
             // Make sure this folder really exists
             if (!fs.existsSync(fhirDefFolder)) {
-                logger.error(`${this.igDir}/sushi-config.yaml file found, but ${fhirDefFolder} does not exist. You may need to re-run the FHIR IG Publisher. You can also avoid this error by setting the --input option to the folder that contains ImplementationGuide-some-id.json.`);
+                logger.error(
+                    `${this.igDir}/sushi-config.yaml file found, but ${fhirDefFolder} does not exist. You may need to re-run the FHIR IG Publisher. You can also avoid this error by setting the --input option to the folder that contains ImplementationGuide-some-id.json.`
+                );
                 process.exit();
             }
         }
@@ -183,19 +191,23 @@ export class IgSummary {
             logger.info('Has SUSHI configuration file');
             sushiConfig = fshutils.readConfig(this.igDir);
         }
-            // If there is no sushi config, construct a Configuration object manually with the required info from the ImplementationGuide
+        // If there is no sushi config, construct a Configuration object manually with the required info from the ImplementationGuide
         // instance and package.json.
         else {
-            logger.info('No SUSHI configuration file found; grabbing from package.json and the IG instance');
+            logger.info(
+                'No SUSHI configuration file found; grabbing from package.json and the IG instance'
+            );
             const packagePath = path.join(this.fhirDefFolder, 'package.json');
             if (!fs.existsSync(packagePath)) {
-                logger.error(`${packagePath} as not found. To resolve this error, make sure this file exists, or alternatively point --input to a folder with a sushi-config.yaml file and IG publisher output in output/.`);
+                logger.error(
+                    `${packagePath} as not found. To resolve this error, make sure this file exists, or alternatively point --input to a folder with a sushi-config.yaml file and IG publisher output in output/.`
+                );
                 process.exit();
             }
             const packageJson = JSON.parse(fs.readFileSync(packagePath, 'utf8'));
             // Verify expected keys are there
             const expected = ['canonical', 'fhirVersions', 'name'];
-            if (!expected.map((m) => packageJson[m] !== undefined).every((x) => x === true)) {
+            if (!expected.map(m => packageJson[m] !== undefined).every(x => x === true)) {
                 logger.error(`package.json must contain ${expected.join(', ')}`);
                 process.exit();
             }
@@ -204,7 +216,9 @@ export class IgSummary {
             // We want to de-duplicate and check to make sure there is only one instance of IG -- if there is more than
             // one, we won't know which to choose.
             if (_.uniqBy(this.defs.allImplementationGuides(), 'id').length > 1) {
-                logger.error(`Multiple ImplementationGuide instances found in ${this.fhirDefFolder}. If this is not accidental, please log a bug with your specific use case so we can investigate.`);
+                logger.error(
+                    `Multiple ImplementationGuide instances found in ${this.fhirDefFolder}. If this is not accidental, please log a bug with your specific use case so we can investigate.`
+                );
                 process.exit();
             }
             const ig = this.defs.allImplementationGuides()[0];
@@ -234,7 +248,9 @@ export class IgSummary {
         loadFromPath(this.fhirDefFolder, defs);
 
         if (defs.allImplementationGuides().length === 0) {
-            logger.error(`An instance of ImplementationGuide could not be found in '${this.fhirDefFolder}'.`);
+            logger.error(
+                `An instance of ImplementationGuide could not be found in '${this.fhirDefFolder}'.`
+            );
             process.exit();
         }
 
@@ -263,6 +279,22 @@ export class IgSummary {
             logger.error(`No profiles found in ${this.fhirDefFolder}.`);
             return;
         }
+
+        const extensionFlgMap = new Map<string, string>();
+
+        for (const sd of _.uniqBy(this.defs.allProfiles(), 'id')) {
+            const snapshot = sd.snapshot;
+
+            for (const elemJson of snapshot.element.slice(1)) {
+                elemJson.extension?.forEach((ext: any) => {
+                    this.settings.extensionColumn?.forEach((col: string) => {
+                        if (ext.url.includes('/StructureDefinition/' + col))
+                            extensionFlgMap.set(sd.title + elemJson.id + col, 'true');
+                    });
+                });
+            }
+        }
+
         for (const sd of _.uniqBy(this.defs.allProfiles(), 'id')) {
             const snapshot = sd.snapshot;
 
@@ -278,6 +310,11 @@ export class IgSummary {
             // The `slice(1)` skips the first item in the array, which is information about the StructureDefinition
             // that isn't needed.
             for (const elemJson of snapshot.element.slice(1)) {
+                if (this.settings.excludeElement?.includes(elemJson.id)) {
+                    logger.warn(`${elemJson.id} wasn't included in the output summary report`);
+                    continue;
+                }
+
                 if (
                     this.settings.mode == DataDictionaryMode.MustSupport &&
                     !(
@@ -289,7 +326,10 @@ export class IgSummary {
                 ) {
                     continue;
                 }
-                const profileGroup = this.profileGroups && this.profileGroups[sd.id] ? this.profileGroups[sd.id] : '';
+                const profileGroup =
+                    this.profileGroups && this.profileGroups[sd.id]
+                        ? this.profileGroups[sd.id]
+                        : '';
                 const metadata: DataElementInformation = {
                     profileTitle: profileTitle,
                     profileGroup: profileGroup || 'Default',
@@ -322,14 +362,18 @@ export class IgSummary {
                     });
                 });
 
-                if (deduplicatedElemToJson) profileElements = profileElements.concat(deduplicatedElemToJson);
+                if (deduplicatedElemToJson)
+                    profileElements = profileElements.concat(deduplicatedElemToJson);
             }
         }
 
         // Get list of profiles, extensions, and value sets
-        const allExtensions: DataDictionaryJsonSummaryRow[] = _.uniqBy(this.defs.allExtensions(), x => {
-            return x.url;
-        }).map(x => {
+        const allExtensions: DataDictionaryJsonSummaryRow[] = _.uniqBy(
+            this.defs.allExtensions(),
+            x => {
+                return x.url;
+            }
+        ).map(x => {
             return {
                 title: x.title,
                 url: x.url,
@@ -341,7 +385,10 @@ export class IgSummary {
                 return x.url;
             }).map(x => {
                 return {
-                    group: this.profileGroups && this.profileGroups[x.id] ? this.profileGroups[x.id] : 'Default',
+                    group:
+                        this.profileGroups && this.profileGroups[x.id]
+                            ? this.profileGroups[x.id]
+                            : 'Default',
                     // `title` is not required but is probably preferable for human readability
                     // `name` is a fallback if `title` is not available
                     title: x.title || x.name,
@@ -351,18 +398,24 @@ export class IgSummary {
             }),
             ['group', 'title']
         );
-        const allValueSets: DataDictionaryJsonSummaryRow[] = _.uniqBy(this.defs.allValueSets(), x => {
-            return x.url;
-        }).map(x => {
+        const allValueSets: DataDictionaryJsonSummaryRow[] = _.uniqBy(
+            this.defs.allValueSets(),
+            x => {
+                return x.url;
+            }
+        ).map(x => {
             return {
                 title: x.title,
                 url: x.url,
                 description: x.description
             };
         });
-        const allCodeSystems: DataDictionaryJsonSummaryRow[] = _.uniqBy(this.defs.allCodeSystems(), x => {
-            return x.url;
-        }).map(x => {
+        const allCodeSystems: DataDictionaryJsonSummaryRow[] = _.uniqBy(
+            this.defs.allCodeSystems(),
+            x => {
+                return x.url;
+            }
+        ).map(x => {
             return {
                 title: x.title,
                 url: x.url,
@@ -371,11 +424,13 @@ export class IgSummary {
         });
 
         // Get all value set elements in a format that can be displayed by ExcelJS
-        const valueSets: { [key: string]: ValueSet } = this.defs.allValueSets().reduce((map, valueSet) => {
-            const vs = new ValueSet(valueSet, this.settings);
-            map[vs.def.url] = vs;
-            return map;
-        }, {});
+        const valueSets: { [key: string]: ValueSet } = this.defs
+            .allValueSets()
+            .reduce((map, valueSet) => {
+                const vs = new ValueSet(valueSet, this.settings);
+                map[vs.def.url] = vs;
+                return map;
+            }, {});
         const valueSetElements: ValueSetRow[] = _.flatten(
             Object.values(valueSets).map(valueSet => {
                 return valueSet.toJSON(valueSets);
@@ -395,7 +450,10 @@ export class IgSummary {
             }
         };
 
-        const dataDictionaryPath = path.join(fs.realpathSync(this.outputDir), this.settings.filename + '.json');
+        const dataDictionaryPath = path.join(
+            fs.realpathSync(this.outputDir),
+            this.settings.filename + '.json'
+        );
         fs.writeFileSync(dataDictionaryPath, JSON.stringify(jsonOutput, null, 2));
         logger.info(`Data dictionary JSON written to ${dataDictionaryPath}`);
 
@@ -413,8 +471,10 @@ export class IgSummary {
             bold: true,
             size: 16
         };
+
         [
-            ['', 'IG name', this.sushiConfig.title],
+            ['', 'IG name', this.sushiConfig.name],
+            ['', 'IG title', this.sushiConfig.title],
             ['', 'IG URL', this.sushiConfig.url],
             ['', 'IG version', this.sushiConfig.version],
             ['', 'IG status', this.sushiConfig.status],
@@ -424,6 +484,8 @@ export class IgSummary {
             ['', '# Extensions', allExtensions.length],
             ['', '# Value Sets', allValueSets.length],
             ['', '# Code Systems', allCodeSystems.length],
+            [''],
+            ['', 'Extension type used for Extension? column', this.settings.extensionColumn],
             [''],
             ['', 'Data dictionary generated date', new Date().toLocaleString('en-US')]
         ].forEach(line => {
@@ -450,15 +512,15 @@ export class IgSummary {
         }
 
         indexWorksheet.getRows(1, 1000).forEach(x => {
-            x.font = {name: 'Helvetica'};
+            x.font = { name: 'Helvetica' };
             x.fill = {
-                fgColor: {argb: 'FFFFFFFF'},
+                fgColor: { argb: 'FFFFFFFF' },
                 pattern: 'solid',
                 type: 'pattern'
             };
         });
-        indexWorksheet.getColumn(2).font = {name: 'Helvetica', bold: true};
-        indexWorksheet.getRow(2).font = {name: 'Helvetica', bold: true, size: 16};
+        indexWorksheet.getColumn(2).font = { name: 'Helvetica', bold: true };
+        indexWorksheet.getRow(2).font = { name: 'Helvetica', bold: true, size: 16 };
         autosizeColumns(indexWorksheet);
         setForColumn(indexWorksheet, 3, 100);
         indexWorksheet.views = [
@@ -470,7 +532,7 @@ export class IgSummary {
         ];
 
         for (const row of titleRows) {
-            row.font = {name: 'Helvetica', bold: true, size: 14};
+            row.font = { name: 'Helvetica', bold: true, size: 14 };
             row.getCell(3).merge(row.getCell(2));
         }
 
@@ -488,7 +550,7 @@ export class IgSummary {
                 showRowStripes: true
             },
             columns: Object.keys(allProfiles[0]).map(k => {
-                return {name: changeCase.capitalCase(k), key: k, filterButton: true};
+                return { name: changeCase.capitalCase(k), key: k, filterButton: true };
             }),
             rows: allProfiles.map(k => {
                 return Object.values(k);
@@ -510,7 +572,24 @@ export class IgSummary {
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+        // Add extension columns dynamically
         const profileElementsWorksheet = workbook.addWorksheet('Data elements');
+        const col = Object.keys(profileElements[0]).map(k => {
+            return { name: k, key: k, filterButton: true };
+        });
+
+        this.settings.extensionColumn?.forEach((ec: string) => {
+            col.push({ name: ec, key: ec, filterButton: true });
+        });
+
+        profileElements.forEach(pe => {
+            this.settings.extensionColumn?.forEach((ec: string) => {
+                pe[ec] = extensionFlgMap.get(
+                    pe[SpreadsheetColNames.ProfileTitle] + pe[SpreadsheetColNames.FHIRElement] + ec
+                );
+            });
+        });
+
         // Add table
         profileElementsWorksheet.addTable({
             name: 'profile_data_elements',
@@ -521,9 +600,7 @@ export class IgSummary {
                 theme: 'TableStyleMedium2',
                 showRowStripes: true
             },
-            columns: Object.keys(profileElements[0]).map(k => {
-                return {name: k, key: k, filterButton: true};
-            }),
+            columns: col,
             rows: profileElements.map(k => {
                 return Object.values(k);
             })
@@ -566,7 +643,7 @@ export class IgSummary {
                     showRowStripes: true
                 },
                 columns: Object.keys(allValueSets[0]).map(k => {
-                    return {name: changeCase.capitalCase(k), filterButton: true};
+                    return { name: changeCase.capitalCase(k), filterButton: true };
                 }),
                 rows: allValueSets.map(k => {
                     return Object.values(k);
@@ -627,7 +704,7 @@ export class IgSummary {
                     showRowStripes: true
                 },
                 columns: valueSetCodesHeaders.map(k => {
-                    return {name: changeCase.capitalCase(k), key: k, filterButton: true};
+                    return { name: changeCase.capitalCase(k), key: k, filterButton: true };
                 }),
                 rows: valueSetRows
             });
@@ -647,7 +724,7 @@ export class IgSummary {
             // Expand/collapse
             for (let i = 0; i < valueSetSectionStarts.length; i++) {
                 let row = valueSetCodesWorkbook.getRow(valueSetSectionStarts[i]);
-                row.font = {name: 'Helvetica', bold: true};
+                row.font = { name: 'Helvetica', bold: true };
                 row.outlineLevel = 1;
 
                 let nextSectionStart: number;
@@ -681,7 +758,7 @@ export class IgSummary {
                     showRowStripes: true
                 },
                 columns: Object.keys(allExtensions[0]).map(k => {
-                    return {name: changeCase.capitalCase(k), filterButton: true};
+                    return { name: changeCase.capitalCase(k), filterButton: true };
                 }),
                 rows: allExtensions.map(k => {
                     return Object.values(k);
@@ -712,5 +789,4 @@ export class IgSummary {
             differ.logSummary();
         }
     }
-
 }

@@ -1048,7 +1048,7 @@ export class Differ {
         ]);
         row.getCell(2).merge(row.getCell(1));
         row.getCell(3).merge(row.getCell(1));
-        if (Object.keys(this.addedProfiles).length > 0) {
+        if (Object.keys(this.addedValueSets).length > 0) {
             worksheetAddedValueSets.addTable({
                 name: 'added_value_sets',
                 ref: 'A3',
@@ -1108,7 +1108,7 @@ export class Differ {
         ]);
         row.getCell(2).merge(row.getCell(1));
         row.getCell(3).merge(row.getCell(1));
-        if (Object.keys(this.removedProfiles).length > 0) {
+        if (Object.keys(this.removedValueSets).length > 0) {
             worksheetRemovedValueSets.addTable({
                 name: 'removed_value_sets',
                 ref: 'A3',

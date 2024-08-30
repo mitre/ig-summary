@@ -1,6 +1,6 @@
-import {fhirdefs, fshtypes, utils as fshutils} from 'fsh-sushi';
-import {BootstrappedFixture} from './testHelpers';
-import {DataElementInformation} from '../src/elements/ProfileElement';
+import { fhirdefs, fshtypes, utils as fshutils } from 'fsh-sushi';
+import { BootstrappedFixture } from './testHelpers';
+import { DataElementInformation } from '../src/elements/ProfileElement';
 
 export let sushiConfig: fshtypes.Configuration;
 export let defs: fhirdefs.FHIRDefinitions;
@@ -23,19 +23,32 @@ export const fixturePackages: { [key in FixturePackageNames]: string } = {
     [FixturePackageNames.QICORE_STU5]: 'https://hl7.org/fhir/us/qicore/package.tgz',
     [FixturePackageNames.QICORE_STU6]: 'https://hl7.org/fhir/us/qicore/2023Sep/package.tgz',
     [FixturePackageNames.MCODE_STU1]: 'https://hl7.org/fhir/us/mcode/STU1/package.tgz',
-    [FixturePackageNames.SDOH_CLIN_CARE_STU2]: 'https://hl7.org/fhir/us/sdoh-clinicalcare/STU2.1/package.tgz'
+    [FixturePackageNames.SDOH_CLIN_CARE_STU2]:
+        'https://hl7.org/fhir/us/sdoh-clinicalcare/STU2.1/package.tgz'
 };
 // Loading dependencies for US Core takes 25 seconds, so provide an option without dependencies
 // mCODE dependencies take 2-3 seconds
 // Only use the fixtures with dependencies if the test actually needs them
-export const uscore_stu6_with_dependencies = new BootstrappedFixture(FixturePackageNames.USCORE_STU6, true);
+export const uscore_stu6_with_dependencies = new BootstrappedFixture(
+    FixturePackageNames.USCORE_STU6,
+    true
+);
 export const uscore_stu6 = new BootstrappedFixture(FixturePackageNames.USCORE_STU6, false);
-export const mcode_stu1_with_dependencies = new BootstrappedFixture(FixturePackageNames.MCODE_STU1, true);
+export const mcode_stu1_with_dependencies = new BootstrappedFixture(
+    FixturePackageNames.MCODE_STU1,
+    true
+);
 export const mcode_stu1 = new BootstrappedFixture(FixturePackageNames.MCODE_STU1, false);
-export const mcode_stu2_with_dependencies = new BootstrappedFixture(FixturePackageNames.MCODE_STU2, true);
+export const mcode_stu2_with_dependencies = new BootstrappedFixture(
+    FixturePackageNames.MCODE_STU2,
+    true
+);
 export const mcode_stu2 = new BootstrappedFixture(FixturePackageNames.MCODE_STU2, false);
 export const mcode_stu3 = new BootstrappedFixture(FixturePackageNames.MCODE_STU3, false);
-export const sdoh_clin_care_stu2 = new BootstrappedFixture(FixturePackageNames.SDOH_CLIN_CARE_STU2, false);
+export const sdoh_clin_care_stu2 = new BootstrappedFixture(
+    FixturePackageNames.SDOH_CLIN_CARE_STU2,
+    false
+);
 export const qicore_stu5 = new BootstrappedFixture(FixturePackageNames.QICORE_STU5, false);
 export const qicore_stu6 = new BootstrappedFixture(FixturePackageNames.QICORE_STU6, false);
 

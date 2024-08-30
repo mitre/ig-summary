@@ -1,4 +1,4 @@
-import {qicore_stu6} from './testSetup';
+import { qicore_stu6 } from './testSetup';
 
 describe('ProfileElement', () => {
     describe('Element exists', () => {
@@ -41,6 +41,5 @@ describe('ProfileElement', () => {
                 'http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-simple-observation'
             );
         });
-
     });
 });

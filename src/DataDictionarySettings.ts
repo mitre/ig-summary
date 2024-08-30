@@ -13,7 +13,9 @@ export type DataDictionarySettings = {
     codeSystems?: { [key: string]: string };
     informationTabContent?: { [key: string]: string };
     touchUpHumanizedElementNames?: { [key: string]: string };
-    suppressFixedCodes?: boolean
+    suppressFixedCodes?: boolean;
+    extensionColumn?: string[];
+    excludeElement?: string[];
 };
 
 export function loadSettingsFromYaml(settingsPath: string): DataDictionarySettings {

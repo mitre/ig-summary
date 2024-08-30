@@ -5,8 +5,7 @@ import {
     mcode_stu2_with_dependencies,
     uscore_stu6
 } from './testSetup';
-import {ProfileExtensionElement} from '../src/elements/ProfileExtensionElement';
-
+import { ProfileExtensionElement } from '../src/elements/ProfileExtensionElement';
 
 describe('ProfileExtensionElement', () => {
     describe('Identify simple and complex extensions correctly', () => {
@@ -101,7 +100,7 @@ describe('ProfileExtensionElement', () => {
             );
             expect(elem.elem.valueSet.uri).toBe(
                 'http://hl7.org/fhir/us/mcode/ValueSet/mcode-cancer-disease-status-evidence-type-vs' +
-                ''
+                    ''
             );
             expect(elem.elem.valueSet.binding).toBe('required');
         });
