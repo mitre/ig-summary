@@ -244,7 +244,7 @@ export class ProfileExtensionElement extends ProfileElement {
             this.extensionProfileURI || this.dataElementInformation.elementStructureDefinitionURI
         );
         if (!this._structureDefinition) {
-            throw `Could not find extension definition for ${this.elem.path} in ${this.dataElementInformation.profileTitle}`;
+            throw `Could not find extension definition ${this.extensionProfileURI || this.dataElementInformation.elementStructureDefinitionURI} for ${this.elem.path} in ${this.dataElementInformation.profileTitle}`;
         }
 
         return this._structureDefinition;

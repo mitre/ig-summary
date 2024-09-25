@@ -305,7 +305,7 @@ export class ProfileElement {
             this.dataElementInformation.sourceProfileURI
         );
         if (this._structureDefinition === undefined) {
-            throw `Could not find extension definition for ${this.dataElementInformation.sourceProfileURI} in ${this.dataElementInformation.profileTitle}`;
+            throw `Could not find extension definition ${this.dataElementInformation.sourceProfileURI} for ${this.dataElementInformation.sourceProfileURI} in ${this.dataElementInformation.profileTitle}`;
         }
         return this._structureDefinition;
     }
