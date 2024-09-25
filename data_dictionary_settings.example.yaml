@@ -7,11 +7,14 @@ excludeElement: [
   'DeviceRequest.modifierExtension:doNotPerform',
   'Task.output.value[x]',
   'Encounter.reasonReference',
-  'Claim.extension:encounter']
+  'Claim.extension:encounter',
+  'QuestionnaireResponse.item.extension',
+  'QuestionnaireResponse.questionnaire.extension:url']
 
 extensionColumn: [
   'uscdi-requirement',
-  'qicore-keyelement'
+  'qicore-keyelement',
+  'used-by-measure'
 ]
 
 filename: 'data_dictionary'

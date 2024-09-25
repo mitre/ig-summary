@@ -296,6 +296,7 @@ export class IgSummary {
         }
 
         for (const sd of _.uniqBy(this.defs.allProfiles(), 'id')) {
+            
             const snapshot = sd.snapshot;
 
             // Skip abstract profiles
@@ -310,60 +311,67 @@ export class IgSummary {
             // The `slice(1)` skips the first item in the array, which is information about the StructureDefinition
             // that isn't needed.
             for (const elemJson of snapshot.element.slice(1)) {
-                if (this.settings.excludeElement?.includes(elemJson.id)) {
-                    logger.warn(`${elemJson.id} wasn't included in the output summary report`);
-                    continue;
-                }
+                try {
+                    if (this.settings.excludeElement?.includes(elemJson.id)) {
+                        logger.warn(`${elemJson.id} wasn't included in the output summary report`);
+                        continue;
+                    }
 
-                if (
-                    this.settings.mode == DataDictionaryMode.MustSupport &&
-                    !(
-                        // In MS mode, elements must be MS
-                        // TODO: Consider minimum cardinality mode
-                        // elemJson.mustSupport == true || elemJson.min === 1
-                        (elemJson.mustSupport == true)
-                    )
-                ) {
-                    continue;
-                }
-                const profileGroup =
-                    this.profileGroups && this.profileGroups[sd.id]
-                        ? this.profileGroups[sd.id]
-                        : '';
-                const metadata: DataElementInformation = {
-                    profileTitle: profileTitle,
-                    profileGroup: profileGroup || 'Default',
-                    baseResourceType: sd.type,
-                    sourceProfileURI: sd.url,
-                    elementStructureDefinitionURI: sd.url
-                };
-                const elem = ProfileElementFactory.getElement(
-                    elemJson,
-                    metadata,
-                    [this.defs, this.externalDefs],
-                    this.settings
-                );
-
-                const elemToJson = elem.toJSON();
-                // Filter down to unique elements -- there may be duplicates because extension ProfileElement objects
-                // automatically add sub-elements.
-                const existingElements = profileElements.map(x => {
-                    return {
-                        profile: x['Source Profile URI'],
-                        sd: x['Element StructureDefinition URI'],
-                        elem: x['FHIR Element (R4)']
+                    if (
+                        this.settings.mode == DataDictionaryMode.MustSupport &&
+                        !(
+                            // In MS mode, elements must be MS
+                            // TODO: Consider minimum cardinality mode
+                            // elemJson.mustSupport == true || elemJson.min === 1
+                            (elemJson.mustSupport == true)
+                        )
+                    ) {
+                        continue;
+                    }
+                    const profileGroup =
+                        this.profileGroups && this.profileGroups[sd.id]
+                            ? this.profileGroups[sd.id]
+                            : '';
+                    const metadata: DataElementInformation = {
+                        profileTitle: profileTitle,
+                        profileGroup: profileGroup || 'Default',
+                        baseResourceType: sd.type,
+                        sourceProfileURI: sd.url,
+                        elementStructureDefinitionURI: sd.url
                     };
-                });
-                const deduplicatedElemToJson = elemToJson.filter(x => {
-                    return !_.find(existingElements, {
-                        profile: x['Source Profile URI'],
-                        sd: x['Element StructureDefinition URI'],
-                        elem: x['FHIR Element (R4)']
-                    });
-                });
+                    
+                    const elem = ProfileElementFactory.getElement(
+                        elemJson,
+                        metadata,
+                        [this.defs, this.externalDefs],
+                        this.settings
+                    );
 
-                if (deduplicatedElemToJson)
-                    profileElements = profileElements.concat(deduplicatedElemToJson);
+                    const elemToJson = elem.toJSON();
+                    // Filter down to unique elements -- there may be duplicates because extension ProfileElement objects
+                    // automatically add sub-elements.
+                    const existingElements = profileElements.map(x => {
+                        return {
+                            profile: x['Source Profile URI'],
+                            sd: x['Element StructureDefinition URI'],
+                            elem: x['FHIR Element (R4)']
+                        };
+                    });
+                    const deduplicatedElemToJson = elemToJson.filter(x => {
+                        return !_.find(existingElements, {
+                            profile: x['Source Profile URI'],
+                            sd: x['Element StructureDefinition URI'],
+                            elem: x['FHIR Element (R4)']
+                        });
+                    });
+
+                    if (deduplicatedElemToJson)
+                        profileElements = profileElements.concat(deduplicatedElemToJson);
+                
+                } catch (err:any) {
+                    logger.error(`${elemJson.id} wasn't included in the output summary report due to an error: ${err.Message}`)
+                    continue;
+                }
             }
         }
 
