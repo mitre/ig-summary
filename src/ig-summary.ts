@@ -76,7 +76,7 @@ See https://github.com/mitre/ig-summary for details.`
             path.resolve(options.a),
             path.resolve(options.b),
             path.resolve(options.output),
-            path.resolve(options.settings)
+            options.settings ? path.resolve(options.settings) : ''
         );
     });
 
